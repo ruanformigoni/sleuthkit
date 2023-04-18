@@ -1,0 +1,21 @@
+FROM ubuntu:latest
+
+
+# Install deps
+RUN apt update && apt upgrade -y
+RUN apt install -y build-essential git libbsd-dev python3-pip autoconf automake libtool patchelf
+RUN git clone https://github.com/ruanformigoni/sleuthkit.git
+
+WORKDIR sleuthkit
+
+# Compile
+RUN ./bootstrap
+RUN ./configure && make -j16
+
+
+# Create static binary
+RUN mkdir -p dist
+RUN pip3 install wheel scons
+RUN pip3 install staticx
+RUN staticx ./tools/fstools/icat dist/icat
+RUN staticx ./tools/fstools/ifind dist/ifind
